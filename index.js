@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+// const Swal = require('sweetalert2')
 const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -32,6 +33,24 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    
+    const database = client.db("coffeyBD");
+    const coffeyCollection = database.collection("coffey");
+    
+    app.get("/coffey", async(req, res) => {
+      const cursor = coffeyCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    app.post('/coffey', async (req, res) => {
+      const newCoffey = req.body;
+      console.log(newCoffey);
+      const result = await coffeyCollection.insertOne(newCoffey);
+      res.send(result);
+    })
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
