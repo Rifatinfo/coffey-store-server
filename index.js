@@ -36,6 +36,7 @@ async function run() {
     
     const database = client.db("coffeyBD");
     const coffeyCollection = database.collection("coffey");
+    const userCollection = client.db('coffeeDB').collection("user")
     
     // read data 
     app.get("/coffey", async(req, res) => {
@@ -49,6 +50,13 @@ async function run() {
       const query = {_id: new ObjectId(id)}
       const result = await coffeyCollection.findOne(query);
       res.send(result);
+    })
+    
+    // user related apis 
+    app.get("/users", async (req, res) => {
+      const cursor = userCollection.find();
+      const users = await cursor.toArray();
+      res.send(users);
     })
 
     app.post("/coffey", async (req, res) => {
@@ -64,6 +72,34 @@ async function run() {
       const result = await coffeyCollection.deleteOne(query);
       res.send(result);
     });
+
+    // user related apis 
+    app.post('/user', async(req, res) => {
+      const user = req.body;
+      console.log(user);
+      const result  = await userCollection.insertOne(user);
+      res.send(result);
+    })
+    
+    app.patch("/user", async (req, res) => {
+      const user = req.body;
+      const filter = {email : user.email}
+      const updateDoc = {
+        $set : {
+          lastLoggedAt : user.lastLoggedAt
+        }
+      }
+      const result = await userCollection.updateOne(filter, updateDoc)
+      res.send(result);
+    })
+
+    // delete operation  users 
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    })
 
     app.put("/coffey/:id", async(req, res) =>{
       const id = req.params.id;
